@@ -9,6 +9,8 @@ class CerebralApp {
         this.currentSubcategory = null;
         this.currentView = 'grid'; // grid or list
         this.currentFilter = { status: 'all', sort: 'recent', search: '' };
+        this.currentCollectionItems = []; // For filtering
+        this.statCardsInitialized = false;
         
         // Define hierarchical subcategories for each main category
         // Simple, flat structure focused on things people actually track
@@ -98,7 +100,7 @@ class CerebralApp {
                 this.showSection(section);
             });
         });
-        
+
         // Smart search input
         const smartSearchInput = document.getElementById('smart-search-input');
         if (smartSearchInput) {
@@ -154,6 +156,16 @@ class CerebralApp {
             });
         });
         
+        // Breadcrumb navigation - prevent accidental navigation
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'breadcrumb-category') {
+                e.preventDefault();
+                e.stopPropagation();
+                // Don't navigate away - stay in current view
+                return false;
+            }
+        });
+        
         // Star rating
         document.addEventListener('click', (e) => {
             if (e.target.closest('.star-rating i')) {
@@ -195,6 +207,26 @@ class CerebralApp {
                     
                     // Navigate to the items view with this subcategory loaded
                     this.showSubcategoryDashboard(this.currentSubcategory);
+                }
+            });
+        }
+        
+        // Add new item from collection dashboard
+        const addCollectionBtn = document.getElementById('add-collection-item');
+        if (addCollectionBtn) {
+            addCollectionBtn.addEventListener('click', () => {
+                if (this.currentSubcategory) {
+                    this.showAddItemForm(this.currentSubcategory);
+                }
+            });
+        }
+        
+        // Add first item (from empty state)
+        const addFirstItemBtn = document.getElementById('add-first-item');
+        if (addFirstItemBtn) {
+            addFirstItemBtn.addEventListener('click', () => {
+                if (this.currentSubcategory) {
+                    this.showAddItemForm(this.currentSubcategory);
                 }
             });
         }
@@ -669,11 +701,21 @@ class CerebralApp {
         });
         
         cancelBtn.addEventListener('click', () => {
-            this.showCategoryDetail();
+            // Go back to collection dashboard
+            if (this.currentSubcategory) {
+                this.showSubcategoryDashboard(this.currentSubcategory);
+            } else {
+                this.showSection('dashboard');
+            }
         });
         
         backBtn.addEventListener('click', () => {
-            this.showCategoryDetail();
+            // Go back to collection dashboard
+            if (this.currentSubcategory) {
+                this.showSubcategoryDashboard(this.currentSubcategory);
+            } else {
+                this.showSection('dashboard');
+            }
         });
     }
     
@@ -681,46 +723,87 @@ class CerebralApp {
         const form = document.getElementById('note-form');
         const formData = new FormData(form);
         
-        const bookData = {
-            title: formData.get('title'),
-            author: formData.get('author'),
-            year: formData.get('year') ? parseInt(formData.get('year')) : null,
-            genre: formData.get('genre'),
-            rating: formData.get('rating') ? parseInt(formData.get('rating')) : null,
-            pages: formData.get('pages') ? parseInt(formData.get('pages')) : null,
-            notes: formData.get('notes'),
-            category: this.currentNoteContext.category,
-            subcategory: `${this.currentNoteContext.subcategory}.${this.currentNoteContext.subSubcategory}`,
-            body_part: 'head',
-            type: 'learning',
-            read_date: formData.get('status') === 'read' ? new Date().toISOString().split('T')[0] : null,
-            created_at: new Date().toISOString()
-        };
+        // Check if this is an edit
+        const editId = form.dataset.editId;
+        const isEdit = !!editId;
+        
+        // Get form values
+        const title = formData.get('title') || document.getElementById('item-title')?.value;
+        const creator = formData.get('creator') || document.getElementById('item-creator')?.value || document.getElementById('item-author')?.value;
+        const year = formData.get('year') || document.getElementById('item-year')?.value;
+        const status = formData.get('status') || document.getElementById('item-status')?.value || 'wishlist';
+        const rating = document.getElementById('item-rating')?.value || 0;
+        const notes = formData.get('notes') || document.getElementById('item-notes')?.value || '';
+        const tags = formData.get('tags') || document.getElementById('item-tags')?.value || '';
+        
+        // Validate required fields
+        if (!title) {
+            this.showNotification('Please enter a title', 'error');
+            return;
+        }
+        
+        if (!this.currentSubcategory) {
+            this.showNotification('No category selected', 'error');
+            return;
+        }
         
         try {
-            await ipcRenderer.invoke('db-run', 
-                `INSERT INTO books (title, author, year, genre, rating, pages, notes, category, subcategory, body_part, type, read_date, created_at) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [bookData.title, bookData.author, bookData.year, bookData.genre, bookData.rating, 
-                 bookData.pages, bookData.notes, bookData.category, bookData.subcategory, 
-                 bookData.body_part, bookData.type, bookData.read_date, bookData.created_at]
-            );
-            
-            // Clear form
-            form.reset();
-            
-            // Reload recent books
-            this.loadRecentBooks();
-            
-            // Update entry counts
-            this.updateEntryCounts();
-            
-            // Show success message
-            this.showSuccessMessage('Book saved successfully!');
+            if (isEdit) {
+                // Update existing item
+                await ipcRenderer.invoke('db-run',
+                    `UPDATE books SET title = ?, author = ?, year = ?, status = ?, rating = ?, notes = ?, tags = ?, updated_at = ? WHERE id = ?`,
+                    [title, creator || 'Unknown', year || '', status, parseInt(rating) || 0, notes, tags, new Date().toISOString(), parseInt(editId)]
+                );
+                
+                this.showNotification('✓ Item updated successfully!', 'success');
+                
+                // Clear form and reset button
+                form.reset();
+                delete form.dataset.editId;
+                if (document.getElementById('item-rating')) {
+                    document.getElementById('item-rating').value = '0';
+                    document.querySelectorAll('.star-rating i').forEach(star => {
+                        star.classList.remove('fas', 'active');
+                        star.classList.add('far');
+                    });
+                }
+                const saveBtn = document.querySelector('#note-form button[type="submit"]');
+                if (saveBtn) saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Item';
+                
+                // Go back to collection dashboard
+                setTimeout(() => {
+                    this.showSubcategoryDashboard(this.currentSubcategory);
+                }, 500);
+                return; // Exit early for edit
+            } else {
+                // Insert new item
+                await ipcRenderer.invoke('db-run',
+                    `INSERT INTO books (title, author, year, subcategory, status, rating, notes, tags, created_at, updated_at) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [title, creator || 'Unknown', year || '', this.currentSubcategory, status, parseInt(rating) || 0, notes, tags, new Date().toISOString(), new Date().toISOString()]
+                );
+                
+                this.showNotification('✓ Item saved successfully!', 'success');
+                
+                // Clear form
+                form.reset();
+                if (document.getElementById('item-rating')) {
+                    document.getElementById('item-rating').value = '0';
+                    document.querySelectorAll('.star-rating i').forEach(star => {
+                        star.classList.remove('fas', 'active');
+                        star.classList.add('far');
+                    });
+                }
+                
+                // Keep user on the form so they can add more items
+                setTimeout(() => {
+                    document.getElementById('item-title')?.focus();
+                }, 100);
+            }
             
         } catch (error) {
-            console.error('Error saving book:', error);
-            this.showErrorMessage('Failed to save book. Please try again.');
+            console.error('Error saving item:', error);
+            this.showNotification('Error saving item. Please try again.', 'error');
         }
     }
     
@@ -2061,29 +2144,75 @@ class CerebralApp {
             }
             
             resultsContainer.innerHTML = results.map(result => `
-                <div class="search-result-item" data-result='${JSON.stringify(result)}'>
+                <div class="search-result-item" data-result='${JSON.stringify(result).replace(/'/g, '&apos;')}'>
                     ${result.thumbnail ? `<img src="${result.thumbnail}" class="search-result-image" alt="${result.title}">` : '<div class="search-result-image"></div>'}
                     <div class="search-result-info">
                         <div class="search-result-title">${result.title}</div>
                         <div class="search-result-meta">
                             ${result.author || result.director || 'Unknown'} ${result.year ? `• ${result.year}` : ''}
                         </div>
+                        <div class="search-result-action">Click to add →</div>
                     </div>
                 </div>
             `).join('');
             
-            // Add click handlers
-            resultsContainer.querySelectorAll('.search-result-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const data = JSON.parse(item.dataset.result);
-                    this.fillFormFromSearchResult(data);
-                    resultsContainer.classList.remove('show');
-                    document.getElementById('smart-search-input').value = '';
+            // Add click handlers - directly save the item
+            resultsContainer.querySelectorAll('.search-result-item').forEach((item, index) => {
+                console.log('Attaching click handler to item', index);
+                item.addEventListener('click', async (e) => {
+                    console.log('Item clicked!', index);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        const data = JSON.parse(item.dataset.result.replace(/&apos;/g, "'"));
+                        console.log('Saving item:', data.title);
+                        await this.saveItemFromSearchResult(data);
+                        resultsContainer.classList.remove('show');
+                        document.getElementById('smart-search-input').value = '';
+                    } catch (error) {
+                        console.error('Error in click handler:', error);
+                    }
                 });
             });
         } catch (error) {
             console.error('Search error:', error);
             resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #ef4444;">Error searching. Please try again.</div>';
+        }
+    }
+    
+    async saveItemFromSearchResult(data) {
+        try {
+            // Prepare item data for database
+            const item = {
+                title: data.title || 'Untitled',
+                author: data.author || data.director || data.creator || 'Unknown',
+                year: data.year || '',
+                subcategory: this.currentSubcategory || 'books',
+                status: 'wishlist',
+                rating: 0,
+                notes: data.description || data.plot || '',
+                cover_image: data.thumbnail || '',
+                tags: data.categories || data.genre || '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            // Save to database
+            await ipcRenderer.invoke('db-run',
+                `INSERT INTO books (title, author, year, subcategory, status, rating, notes, cover_image, tags, created_at, updated_at) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [item.title, item.author, item.year, item.subcategory, item.status, item.rating, item.notes, item.cover_image, item.tags, item.created_at, item.updated_at]
+            );
+            
+            // Show success message
+            this.showNotification(`✓ "${item.title}" added to your collection!`, 'success');
+            
+            // Stay on the same page - don't navigate away
+            // User can continue adding more items or manually go back
+            
+        } catch (error) {
+            console.error('Error saving item:', error);
+            this.showNotification('Error saving item. Please try again.', 'error');
         }
     }
     
@@ -2099,6 +2228,28 @@ class CerebralApp {
         
         // Store full data for later use
         this.currentSearchData = data;
+    }
+    
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
     
     async refreshCategoryView() {
@@ -2722,6 +2873,79 @@ class CerebralApp {
         return div.innerHTML;
     }
     
+    async editItem(id) {
+        try {
+            // Fetch the item
+            const items = await ipcRenderer.invoke('db-query',
+                'SELECT * FROM books WHERE id = ?',
+                [id]
+            );
+            
+            if (items.length === 0) {
+                this.showNotification('Item not found', 'error');
+                return;
+            }
+            
+            const item = items[0];
+            
+            // Navigate to note-taking form and populate with item data
+            this.showAddItemForm(this.currentSubcategory);
+            
+            // Populate form fields
+            setTimeout(() => {
+                document.getElementById('item-title').value = item.title || '';
+                document.getElementById('item-author').value = item.author || '';
+                document.getElementById('item-year').value = item.year || '';
+                document.getElementById('item-notes').value = item.notes || '';
+                document.getElementById('item-status').value = item.status || 'wishlist';
+                document.getElementById('item-rating').value = item.rating || '0';
+                
+                // Update star display
+                const stars = document.querySelectorAll('.star-rating i');
+                stars.forEach((star, index) => {
+                    if (index < (item.rating || 0)) {
+                        star.classList.remove('far');
+                        star.classList.add('fas', 'active');
+                    }
+                });
+                
+                // Store item ID for update
+                document.getElementById('note-form').dataset.editId = id;
+                
+                // Change button text
+                const saveBtn = document.querySelector('#note-form button[type="submit"]');
+                if (saveBtn) saveBtn.innerHTML = '<i class="fas fa-save"></i> Update Item';
+            }, 100);
+            
+        } catch (error) {
+            console.error('Error editing item:', error);
+            this.showNotification('Error loading item', 'error');
+        }
+    }
+    
+    async deleteItem(id) {
+        if (!confirm('Are you sure you want to delete this item?')) {
+            return;
+        }
+        
+        try {
+            await ipcRenderer.invoke('db-run',
+                'DELETE FROM books WHERE id = ?',
+                [id]
+            );
+            
+            this.showNotification('✓ Item deleted successfully', 'success');
+            
+            // Refresh the collection dashboard
+            if (this.currentSubcategory) {
+                await this.loadCollectionDashboard(this.currentSubcategory, this.currentFilter);
+            }
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            this.showNotification('Error deleting item', 'error');
+        }
+    }
+    
     async showSubcategoryDashboard(subcatKey) {
         // Show the collection dashboard section
         this.showSection('collection-dashboard');
@@ -2752,21 +2976,59 @@ class CerebralApp {
         await this.loadCollectionDashboard(subcatKey);
     }
     
-    async loadCollectionDashboard(subcatKey) {
+    showAddItemForm(subcatKey) {
+        // Store current subcategory
+        this.currentSubcategory = subcatKey;
+        
+        // Get subcategory info
+        let subcatInfo = null;
+        for (const category in this.subcategories) {
+            if (this.subcategories[category][subcatKey]) {
+                subcatInfo = this.subcategories[category][subcatKey];
+                break;
+            }
+        }
+        
+        if (!subcatInfo) return;
+        
+        // Navigate to note-taking section
+        this.showSection('note-taking');
+        
+        // Update note-taking header
+        const noteCategoryTitle = document.getElementById('note-category-title');
+        const noteCategoryDescription = document.getElementById('note-category-description');
+        if (noteCategoryTitle) noteCategoryTitle.textContent = `Add ${subcatInfo.name}`;
+        if (noteCategoryDescription) noteCategoryDescription.textContent = subcatInfo.description;
+        
+        // Clear the form
+        const form = document.getElementById('manual-entry-form');
+        if (form) form.reset();
+        
+        // Focus on smart search input
+        const smartSearchInput = document.getElementById('smart-search-input');
+        if (smartSearchInput) {
+            setTimeout(() => smartSearchInput.focus(), 100);
+        }
+    }
+    
+    async loadCollectionDashboard(subcatKey, filter = 'all') {
         try {
-            // Fetch all items for this subcategory
-            const items = await ipcRenderer.invoke('db-query',
+            // Store all items for filtering
+            const allItems = await ipcRenderer.invoke('db-query',
                 'SELECT * FROM books WHERE subcategory = ? ORDER BY created_at DESC',
                 [subcatKey]
             );
             
+            this.currentCollectionItems = allItems; // Store for filtering
+            this.currentFilter = filter;
+            
             // Calculate stats
             const stats = {
-                total: items.length,
-                completed: items.filter(i => i.status === 'completed').length,
-                inProgress: items.filter(i => i.status === 'in-progress').length,
-                wishlist: items.filter(i => i.status === 'wishlist').length,
-                favorites: items.filter(i => i.rating === 5).length
+                total: allItems.length,
+                completed: allItems.filter(i => i.status === 'completed').length,
+                inProgress: allItems.filter(i => i.status === 'in-progress').length,
+                wishlist: allItems.filter(i => i.status === 'wishlist').length,
+                favorites: allItems.filter(i => i.rating === 5).length
             };
             
             // Update stat cards with contextual labels
@@ -2777,22 +3039,74 @@ class CerebralApp {
             const progressBar = document.getElementById('progress-total');
             if (progressBar) progressBar.style.width = `${completionPercent}%`;
             
-            // Render items in grid view (default)
-            this.renderCollectionGrid(items);
-            
-            // Show/hide empty state
-            const emptyState = document.getElementById('collection-empty');
-            const viewContainer = document.querySelector('.collection-view-container');
-            if (items.length === 0) {
-                if (emptyState) emptyState.style.display = 'flex';
-                if (viewContainer) viewContainer.style.display = 'none';
-            } else {
-                if (emptyState) emptyState.style.display = 'none';
-                if (viewContainer) viewContainer.style.display = 'block';
+            // Setup stat card click handlers (only once)
+            if (!this.statCardsInitialized) {
+                this.setupStatCardFilters();
+                this.statCardsInitialized = true;
             }
+            
+            // Apply filter
+            this.applyCollectionFilter(filter);
             
         } catch (error) {
             console.error('Error loading collection dashboard:', error);
+        }
+    }
+    
+    setupStatCardFilters() {
+        const statCards = document.querySelectorAll('.stat-card.clickable-card');
+        statCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const filter = card.dataset.filter;
+                
+                // Update active state
+                statCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                // Apply filter
+                this.applyCollectionFilter(filter);
+            });
+        });
+    }
+    
+    applyCollectionFilter(filter) {
+        let filteredItems = [...this.currentCollectionItems];
+        
+        // Apply status filter
+        if (filter !== 'all') {
+            if (filter === 'favorites') {
+                filteredItems = filteredItems.filter(item => item.rating === 5);
+            } else {
+                filteredItems = filteredItems.filter(item => item.status === filter);
+            }
+        }
+        
+        // Render filtered items
+        this.renderCollectionGrid(filteredItems);
+        
+        // Show/hide empty state
+        const emptyState = document.getElementById('collection-empty');
+        const viewContainer = document.querySelector('.collection-view-container');
+        if (filteredItems.length === 0) {
+            if (emptyState) {
+                emptyState.style.display = 'flex';
+                // Update empty state message based on filter
+                const emptyText = emptyState.querySelector('p');
+                if (emptyText) {
+                    const filterMessages = {
+                        'all': 'No items yet',
+                        'completed': 'No completed items yet',
+                        'in-progress': 'No items in progress',
+                        'wishlist': 'No items in your wishlist',
+                        'favorites': 'No favorites yet'
+                    };
+                    emptyText.textContent = filterMessages[filter] || 'No items found';
+                }
+            }
+            if (viewContainer) viewContainer.style.display = 'none';
+        } else {
+            if (emptyState) emptyState.style.display = 'none';
+            if (viewContainer) viewContainer.style.display = 'block';
         }
     }
     
@@ -2910,24 +3224,38 @@ class CerebralApp {
                     <div class="card-status-badge status-${item.status || 'wishlist'}">${this.getStatusLabel(item.status)}</div>
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">${this.escapeHtml(item.title || 'Untitled')}</h4>
-                    <p class="card-meta">${this.escapeHtml(item.author || item.creator || '')}</p>
+                    <div class="card-info">
+                        <h4 class="card-title">${this.escapeHtml(item.title || 'Untitled')}</h4>
+                        <p class="card-meta">${this.escapeHtml(item.author || item.creator || '')}</p>
+                    </div>
                     ${item.rating ? `<div class="card-rating">${'⭐'.repeat(item.rating)}</div>` : ''}
                     ${item.year ? `<div class="card-year">${item.year}</div>` : ''}
                 </div>
                 <div class="card-actions">
-                    <button class="card-action-btn" onclick="app.viewItem(${item.id})" title="View Details">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="card-action-btn" onclick="app.editItem(${item.id})" title="Edit">
+                    <button class="card-action-btn" data-action="edit" data-id="${item.id}" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="card-action-btn" onclick="app.deleteItem(${item.id})" title="Delete">
+                    <button class="card-action-btn" data-action="delete" data-id="${item.id}" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </div>
         `).join('');
+        
+        // Add event listeners to action buttons
+        gridContainer.querySelectorAll('.card-action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = btn.dataset.action;
+                const id = parseInt(btn.dataset.id);
+                
+                if (action === 'edit') {
+                    this.editItem(id);
+                } else if (action === 'delete') {
+                    this.deleteItem(id);
+                }
+            });
+        });
     }
     
     getItemIcon(item) {

@@ -49,18 +49,54 @@ function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
       author TEXT,
-      year INTEGER,
+      year TEXT,
       genre TEXT,
-      rating INTEGER,
+      rating INTEGER DEFAULT 0,
       pages INTEGER,
       isbn TEXT,
       read_date TEXT,
       notes TEXT,
       category TEXT,
+      subcategory TEXT,
       body_part TEXT,
       type TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      status TEXT DEFAULT 'wishlist',
+      tags TEXT,
+      cover_image TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
+    
+    // Add missing columns to existing books table
+    db.run(`ALTER TABLE books ADD COLUMN subcategory TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.log('Subcategory column already exists or error:', err.message);
+      }
+    });
+    
+    db.run(`ALTER TABLE books ADD COLUMN status TEXT DEFAULT 'wishlist'`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.log('Status column already exists or error:', err.message);
+      }
+    });
+    
+    db.run(`ALTER TABLE books ADD COLUMN tags TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.log('Tags column already exists or error:', err.message);
+      }
+    });
+    
+    db.run(`ALTER TABLE books ADD COLUMN cover_image TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.log('Cover_image column already exists or error:', err.message);
+      }
+    });
+    
+    db.run(`ALTER TABLE books ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.log('Updated_at column already exists or error:', err.message);
+      }
+    });
     
     // Shops table
     db.run(`CREATE TABLE IF NOT EXISTS shops (

@@ -170,25 +170,33 @@
                     </div>
                     
                     <div class="note-content">
-                        <div class="note-form-container">
-                            <!-- Smart Search Section -->
-                            <div class="smart-search-section">
-                                <h3><i class="fas fa-search"></i> Quick Add (Search Database)</h3>
-                                <div class="smart-search-container">
-                                    <input type="text" id="smart-search-input" placeholder="Search for books, movies, music..." class="smart-search-input">
-                                    <div id="smart-search-results" class="smart-search-results">
-                                        <!-- Search results will appear here -->
-                                    </div>
+                        <!-- Smart Search Section (Compact) -->
+                        <div class="quick-add-section">
+                            <div class="quick-add-header">
+                                <h3><i class="fas fa-bolt"></i> Quick Add</h3>
+                                <p>Search our database and add with one click</p>
+                            </div>
+                            <div class="smart-search-container">
+                                <input type="text" id="smart-search-input" placeholder="Search for books, movies, music..." class="smart-search-input">
+                                <div id="smart-search-results" class="smart-search-results">
+                                    <!-- Search results will appear here -->
                                 </div>
                             </div>
-                            
-                            <div class="divider">
-                                <span>OR</span>
+                        </div>
+                        
+                        <div class="divider-section">
+                            <div class="divider-line"></div>
+                            <span class="divider-text">OR ADD MANUALLY</span>
+                            <div class="divider-line"></div>
+                        </div>
+                        
+                        <!-- Manual Entry Form (Wider & More Fields) -->
+                        <div class="manual-entry-section">
+                            <div class="manual-entry-header">
+                                <h3><i class="fas fa-pen-to-square"></i> Detailed Manual Entry</h3>
+                                <p>Add all the details you want to track</p>
                             </div>
-                            
-                            <!-- Manual Entry Form -->
-                            <h3><i class="fas fa-edit"></i> Manual Entry</h3>
-                            <form id="note-form" class="note-form">
+                            <form id="note-form" class="note-form note-form-wide">
                                 <div class="form-group">
                                     <label for="item-title">Title</label>
                                     <input type="text" id="item-title" name="title" placeholder="Enter title..." required>
@@ -424,102 +432,62 @@
 
                         <!-- Stats Overview -->
                         <div class="collection-stats">
-                            <div class="stat-card stat-primary">
+                            <div class="stat-card stat-primary clickable-card" data-filter="all">
                                 <div class="stat-icon-large" id="stat-icon-total">📊</div>
                                 <div class="stat-content">
                                     <div class="stat-value" id="stat-total">0</div>
                                     <div class="stat-label" id="stat-label-total">Total Collection</div>
-                                    <div class="stat-progress">
-                                        <div class="stat-progress-bar" id="progress-total" style="width: 0%"></div>
-                                    </div>
+                                    <div class="card-hint">Click to view all</div>
                                 </div>
                             </div>
-                            <div class="stat-card stat-success">
+                            <div class="stat-card stat-success clickable-card" data-filter="completed">
                                 <div class="stat-icon-large" id="stat-icon-completed">✅</div>
                                 <div class="stat-content">
                                     <div class="stat-value" id="stat-completed">0</div>
                                     <div class="stat-label" id="stat-label-completed">Experienced</div>
-                                    <div class="stat-sublabel" id="stat-sublabel-completed">Completed & enjoyed</div>
+                                    <div class="card-hint">Click to filter</div>
                                 </div>
                             </div>
-                            <div class="stat-card stat-info">
+                            <div class="stat-card stat-info clickable-card" data-filter="in-progress">
                                 <div class="stat-icon-large" id="stat-icon-in-progress">📝</div>
                                 <div class="stat-content">
                                     <div class="stat-value" id="stat-in-progress">0</div>
                                     <div class="stat-label" id="stat-label-in-progress">Currently Exploring</div>
-                                    <div class="stat-sublabel" id="stat-sublabel-in-progress">Active right now</div>
+                                    <div class="card-hint">Click to filter</div>
                                 </div>
                             </div>
-                            <div class="stat-card stat-warning">
+                            <div class="stat-card stat-warning clickable-card" data-filter="wishlist">
                                 <div class="stat-icon-large" id="stat-icon-wishlist">⭐</div>
                                 <div class="stat-content">
                                     <div class="stat-value" id="stat-wishlist">0</div>
                                     <div class="stat-label" id="stat-label-wishlist">Want to Experience</div>
-                                    <div class="stat-sublabel" id="stat-sublabel-wishlist">On your radar</div>
+                                    <div class="card-hint">Click to filter</div>
                                 </div>
                             </div>
-                            <div class="stat-card stat-special">
-                                <div class="stat-icon-large">⭐</div>
+                            <div class="stat-card stat-special clickable-card" data-filter="favorites">
+                                <div class="stat-icon-large">💎</div>
                                 <div class="stat-content">
                                     <div class="stat-value" id="stat-favorites">0</div>
                                     <div class="stat-label">Favorites</div>
-                                    <div class="stat-sublabel">5-star rated</div>
+                                    <div class="card-hint">Click to filter</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Advanced Filters & Views -->
+                        <!-- Simple Filter Bar -->
                         <div class="collection-controls">
-                            <div class="filter-group">
-                                <div class="filter-section">
-                                    <label>Status</label>
-                                    <div class="button-group">
-                                        <button class="filter-btn active" data-filter-type="status" data-filter-value="all">All</button>
-                                        <button class="filter-btn" data-filter-type="status" data-filter-value="completed">Completed</button>
-                                        <button class="filter-btn" data-filter-type="status" data-filter-value="in-progress">In Progress</button>
-                                        <button class="filter-btn" data-filter-type="status" data-filter-value="wishlist">Wishlist</button>
-                                    </div>
-                                </div>
-                                
-                                <div class="filter-section">
-                                    <label>Rating</label>
-                                    <div class="button-group">
-                                        <button class="filter-btn active" data-filter-type="rating" data-filter-value="all">All</button>
-                                        <button class="filter-btn" data-filter-type="rating" data-filter-value="5">⭐⭐⭐⭐⭐</button>
-                                        <button class="filter-btn" data-filter-type="rating" data-filter-value="4">⭐⭐⭐⭐</button>
-                                        <button class="filter-btn" data-filter-type="rating" data-filter-value="3+">⭐⭐⭐+</button>
-                                    </div>
-                                </div>
-                                
-                                <div class="filter-section">
-                                    <label>Sort By</label>
-                                    <select class="sort-select" id="collection-sort">
-                                        <option value="date-desc">Newest First</option>
-                                        <option value="date-asc">Oldest First</option>
-                                        <option value="title-asc">Title (A-Z)</option>
-                                        <option value="title-desc">Title (Z-A)</option>
-                                        <option value="rating-desc">Highest Rated</option>
-                                        <option value="rating-asc">Lowest Rated</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="view-controls">
+                            <div class="simple-filter-bar">
                                 <div class="search-box">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" id="collection-search" placeholder="Search your collection...">
+                                    <input type="text" id="collection-search" placeholder="Search...">
                                 </div>
-                                <div class="view-toggle">
-                                    <button class="view-btn active" data-view="grid" title="Grid View">
-                                        <i class="fas fa-th"></i>
-                                    </button>
-                                    <button class="view-btn" data-view="list" title="List View">
-                                        <i class="fas fa-list"></i>
-                                    </button>
-                                    <button class="view-btn" data-view="timeline" title="Timeline View">
-                                        <i class="fas fa-stream"></i>
-                                    </button>
-                                </div>
+                                <select class="sort-select" id="collection-sort">
+                                    <option value="date-desc">Newest First</option>
+                                    <option value="date-asc">Oldest First</option>
+                                    <option value="title-asc">A-Z</option>
+                                    <option value="title-desc">Z-A</option>
+                                    <option value="rating-desc">Top Rated</option>
+                                </select>
                             </div>
                         </div>
 
