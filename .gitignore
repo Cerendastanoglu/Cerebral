@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Database
+src/data/*.db
+src/data/*.db-journal
+
+# Build outputs
+dist/
+build/
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+.env.local
+
+# Electron specific
+*.cache
+

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerebral - Personal Data Manager</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/collection.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-content">
+                    <button class="open-sidebar-btn" id="open-sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="app-title">
+                        <i class="fas fa-brain"></i>
+                        Cerebral
+                    </h1>
+                    <p class="app-subtitle">Your Personal Knowledge Map</p>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Sidebar Overlay -->
+                <div class="sidebar-overlay" id="sidebar-overlay"></div>
+                
+                <!-- Collapsible Left Sidebar -->
+                <aside class="sidebar" id="sidebar">
+                    <div class="sidebar-header">
+                        <button class="close-btn" id="close-sidebar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="toggle-btn" id="toggle-sidebar">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="sidebar-content">
+                        <nav class="sidebar-nav">
+                            <button class="nav-btn active" data-section="dashboard">
+                                <i class="fas fa-chart-pie"></i>
+                                <span>Dashboard</span>
+                            </button>
+                            <button class="nav-btn" data-section="intellectual">
+                                <i class="fas fa-brain"></i>
+                                <span>Intellectual</span>
+                            </button>
+                            <button class="nav-btn" data-section="emotional">
+                                <i class="fas fa-heart"></i>
+                                <span>Emotional</span>
+                            </button>
+                            <button class="nav-btn" data-section="physical">
+                                <i class="fas fa-fire"></i>
+                                <span>Physical</span>
+                            </button>
+                            <button class="nav-btn" data-section="beyond">
+                                <i class="fas fa-star"></i>
+                                <span>Beyond</span>
+                            </button>
+                        </nav>
+                        
+                        <div class="search-section">
+                            <input type="text" id="global-search" placeholder="Search..." class="search-input">
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="main-content-area" id="main-content">
+                    <!-- Dashboard Section -->
+                    <section id="dashboard-section" class="content-section active">
+                        <div class="dashboard-content">
+                            <div class="dashboard-header">
+                                <h2>Your Personal Knowledge Map</h2>
+                                <p>Explore your intellectual curiosity, emotional experiences, physical adventures, and moments beyond</p>
+                            </div>
+                            
+                            <!-- Overview Stats -->
+                            <div class="stats-grid">
+                                <div class="stat-card stat-intellectual">
+                                    <i class="fas fa-brain stat-icon"></i>
+                                    <div class="stat-info">
+                                        <div class="stat-number" id="stat-intellectual">0</div>
+                                        <div class="stat-label">Intellectual</div>
+                                        <div class="stat-detail" id="stat-intellectual-detail">0 this week</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card stat-emotional">
+                                    <i class="fas fa-heart stat-icon"></i>
+                                    <div class="stat-info">
+                                        <div class="stat-number" id="stat-emotional">0</div>
+                                        <div class="stat-label">Emotional</div>
+                                        <div class="stat-detail" id="stat-emotional-detail">0 this week</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card stat-physical">
+                                    <i class="fas fa-dumbbell stat-icon"></i>
+                                    <div class="stat-info">
+                                        <div class="stat-number" id="stat-physical">0</div>
+                                        <div class="stat-label">Physical</div>
+                                        <div class="stat-detail" id="stat-physical-detail">0 this week</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card stat-beyond">
+                                    <i class="fas fa-star stat-icon"></i>
+                                    <div class="stat-info">
+                                        <div class="stat-number" id="stat-beyond">0</div>
+                                        <div class="stat-label">Beyond</div>
+                                        <div class="stat-detail" id="stat-beyond-detail">0 this week</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recent Activity -->
+                            <div class="dashboard-section">
+                                <h3>Recent Activity</h3>
+                                <div id="recent-activity" class="activity-list">
+                                    <!-- Recent items will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Stats -->
+                            <div class="dashboard-section">
+                                <h3>Quick Stats</h3>
+                                <div class="quick-stats-grid">
+                                    <div class="quick-stat">
+                                        <i class="fas fa-book"></i>
+                                        <span class="quick-stat-number" id="books-count">0</span>
+                                        <span class="quick-stat-label">Books</span>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <i class="fas fa-film"></i>
+                                        <span class="quick-stat-number" id="movies-count">0</span>
+                                        <span class="quick-stat-label">Movies</span>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <i class="fas fa-music"></i>
+                                        <span class="quick-stat-number" id="music-count">0</span>
+                                        <span class="quick-stat-label">Music</span>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <i class="fas fa-dumbbell"></i>
+                                        <span class="quick-stat-number" id="workouts-count">0</span>
+                                        <span class="quick-stat-label">Workouts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                <!-- Note Taking Section -->
+                <section id="note-taking-section" class="content-section">
+                    <div class="note-header">
+                        <button class="btn btn-secondary" id="back-to-category-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Category
+                        </button>
+                        <div class="note-title-section">
+                            <h2 id="note-category-title">Add New Item</h2>
+                            <p id="note-category-description">Track your items</p>
+                        </div>
+                    </div>
+                    
+                    <div class="note-content">
+                        <div class="note-form-container">
+                            <!-- Smart Search Section -->
+                            <div class="smart-search-section">
+                                <h3><i class="fas fa-search"></i> Quick Add (Search Database)</h3>
+                                <div class="smart-search-container">
+                                    <input type="text" id="smart-search-input" placeholder="Search for books, movies, music..." class="smart-search-input">
+                                    <div id="smart-search-results" class="smart-search-results">
+                                        <!-- Search results will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="divider">
+                                <span>OR</span>
+                            </div>
+                            
+                            <!-- Manual Entry Form -->
+                            <h3><i class="fas fa-edit"></i> Manual Entry</h3>
+                            <form id="note-form" class="note-form">
+                                <div class="form-group">
+                                    <label for="item-title">Title</label>
+                                    <input type="text" id="item-title" name="title" placeholder="Enter title..." required>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="item-creator">Creator/Author/Artist</label>
+                                        <input type="text" id="item-creator" name="creator" placeholder="Enter name...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="item-year">Year</label>
+                                        <input type="number" id="item-year" name="year" placeholder="2024" min="1000" max="2030">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="item-category">Category</label>
+                                        <select id="item-category" name="category">
+                                            <option value="">Select category...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="item-status">Status</label>
+                                        <select id="item-status" name="status">
+                                            <option value="want">Want to Try</option>
+                                            <option value="in-progress">In Progress</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="item-rating">Rating</label>
+                                        <div class="star-rating">
+                                            <i class="far fa-star" data-rating="1"></i>
+                                            <i class="far fa-star" data-rating="2"></i>
+                                            <i class="far fa-star" data-rating="3"></i>
+                                            <i class="far fa-star" data-rating="4"></i>
+                                            <i class="far fa-star" data-rating="5"></i>
+                                        </div>
+                                        <input type="hidden" id="item-rating" name="rating" value="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="item-tags">Tags</label>
+                                        <input type="text" id="item-tags" name="tags" placeholder="Comma-separated tags...">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="item-notes">Notes & Thoughts</label>
+                                    <textarea id="item-notes" name="notes" placeholder="Share your thoughts, key insights, quotes, or anything else you'd like to remember..." rows="6"></textarea>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" id="cancel-note-btn">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Item</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Category Detail Sections -->
+                <section id="category-detail-section" class="content-section">
+                    <div class="brain-category-view">
+                        <!-- Category Header -->
+                        <div class="brain-category-header">
+                            <h2 id="category-title">Intellectual</h2>
+                            <p id="category-description">Your knowledge space</p>
+                        </div>
+                        
+                        <!-- Brain Visualization Area -->
+                        <div class="brain-map-container">
+                            <div class="brain-visual">
+                                <!-- SVG Brain illustration will go here -->
+                                <svg viewBox="0 0 800 600" class="brain-svg" id="brain-svg">
+                                    <!-- Gradients for different categories -->
+                                    <defs>
+                                        <!-- Intellectual (Blue/Purple) -->
+                                        <linearGradient id="intellectualGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.3" />
+                                        </linearGradient>
+                                        
+                                        <!-- Emotional (Pink/Red) -->
+                                        <linearGradient id="emotionalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#ec4899;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.3" />
+                                        </linearGradient>
+                                        
+                                        <!-- Physical (Green/Emerald) -->
+                                        <linearGradient id="physicalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#059669;stop-opacity:0.3" />
+                                        </linearGradient>
+                                        
+                                        <!-- Beyond (Gold/Amber) -->
+                                        <linearGradient id="beyondGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#d97706;stop-opacity:0.3" />
+                                        </linearGradient>
+                                        
+                                        <filter id="glow">
+                                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                            <feMerge>
+                                                <feMergeNode in="coloredBlur"/>
+                                                <feMergeNode in="SourceGraphic"/>
+                                            </feMerge>
+                                        </filter>
+                                    </defs>
+                                    
+                                    <!-- Central Category Display -->
+                                    <g id="central-shape">
+                                        <!-- Simple circle backgrounds with category colors -->
+                                        <circle id="brain-shape" cx="400" cy="300" r="100" 
+                                                fill="url(#intellectualGradient)" 
+                                                opacity="0.15"
+                                                style="display:none"/>
+                                        
+                                        <circle id="heart-shape" cx="400" cy="300" r="100" 
+                                                fill="url(#emotionalGradient)" 
+                                                opacity="0.15"
+                                                style="display:none"/>
+                                        
+                                        <circle id="fire-shape" cx="400" cy="300" r="100" 
+                                                fill="url(#physicalGradient)" 
+                                                opacity="0.15"
+                                                style="display:none"/>
+                                        
+                                        <circle id="professional-shape" cx="400" cy="300" r="100" 
+                                                fill="url(#intellectualGradient)" 
+                                                opacity="0.15"
+                                                style="display:none"/>
+                                        
+                                        <circle id="beyond-shape" cx="400" cy="300" r="100" 
+                                                fill="url(#beyondGradient)" 
+                                                opacity="0.15"
+                                                style="display:none"/>
+                                        
+                                        <!-- Category emoji will be inserted here dynamically -->
+                                        <text id="center-emoji" x="400" y="320" 
+                                              text-anchor="middle" 
+                                              font-size="72" 
+                                              opacity="0.4"
+                                              style="display:none"></text>
+                                    </g>
+                                    
+                                    <!-- Knowledge nodes will be added dynamically -->
+                                    <g id="knowledge-nodes"></g>
+                                </svg>
+                                
+                                <!-- Floating knowledge bubbles will be positioned absolutely -->
+                                <div id="knowledge-bubbles" class="knowledge-bubbles"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Selected Subcategory Navigation Panel -->
+                        <div id="subcategory-detail-panel" class="subcategory-detail-panel hidden">
+                            <div class="panel-header">
+                                <div class="panel-header-content">
+                                    <div class="panel-icon" id="panel-icon">📚</div>
+                                    <div>
+                                        <h3 id="selected-subcategory-title">Books</h3>
+                                        <p class="panel-subtitle" id="selected-subcategory-description">Books you've read or want to read</p>
+                                    </div>
+                                </div>
+                                <button class="close-panel-btn" id="close-subcategory-panel">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="panel-content">
+                                <!-- Quick Stats -->
+                                <div class="panel-stats">
+                                    <div class="panel-stat">
+                                        <div class="panel-stat-value" id="panel-total-count">0</div>
+                                        <div class="panel-stat-label">Total Items</div>
+                                    </div>
+                                    <div class="panel-stat">
+                                        <div class="panel-stat-value" id="panel-recent-count">0</div>
+                                        <div class="panel-stat-label">This Week</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Navigation Options -->
+                                <div class="panel-actions">
+                                    <button class="panel-action-btn primary" id="view-subcategory-dashboard">
+                                        <i class="fas fa-th-large"></i>
+                                        <div>
+                                            <div class="action-btn-title">View Dashboard</div>
+                                            <div class="action-btn-subtitle">See all your items</div>
+                                        </div>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <button class="panel-action-btn" id="add-new-item">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <div>
+                                            <div class="action-btn-title">Add New Item</div>
+                                            <div class="action-btn-subtitle">Quick add to collection</div>
+                                        </div>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Recent Items Preview -->
+                                <div class="panel-section">
+                                    <h4 class="panel-section-title">Recent Items</h4>
+                                    <div id="subcategory-recent-items" class="recent-items-preview">
+                                        <!-- Recent items will be listed here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Collection Dashboard - Universal View for All Subcategories -->
+                <section id="collection-dashboard" class="content-section">
+                    <div class="collection-container">
+                        <!-- Header with Breadcrumb -->
+                        <div class="collection-header">
+                            <div class="breadcrumb">
+                                <span class="breadcrumb-item" id="breadcrumb-category">Intellectual</span>
+                                <i class="fas fa-chevron-right"></i>
+                                <span class="breadcrumb-item active" id="breadcrumb-subcategory">Books</span>
+                            </div>
+                            <button class="btn-primary" id="add-collection-item">
+                                <i class="fas fa-plus"></i> Add New
+                            </button>
+                        </div>
+
+                        <!-- Stats Overview -->
+                        <div class="collection-stats">
+                            <div class="stat-card stat-primary">
+                                <div class="stat-icon-large" id="stat-icon-total">📊</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="stat-total">0</div>
+                                    <div class="stat-label" id="stat-label-total">Total Collection</div>
+                                    <div class="stat-progress">
+                                        <div class="stat-progress-bar" id="progress-total" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-card stat-success">
+                                <div class="stat-icon-large" id="stat-icon-completed">✅</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="stat-completed">0</div>
+                                    <div class="stat-label" id="stat-label-completed">Experienced</div>
+                                    <div class="stat-sublabel" id="stat-sublabel-completed">Completed & enjoyed</div>
+                                </div>
+                            </div>
+                            <div class="stat-card stat-info">
+                                <div class="stat-icon-large" id="stat-icon-in-progress">📝</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="stat-in-progress">0</div>
+                                    <div class="stat-label" id="stat-label-in-progress">Currently Exploring</div>
+                                    <div class="stat-sublabel" id="stat-sublabel-in-progress">Active right now</div>
+                                </div>
+                            </div>
+                            <div class="stat-card stat-warning">
+                                <div class="stat-icon-large" id="stat-icon-wishlist">⭐</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="stat-wishlist">0</div>
+                                    <div class="stat-label" id="stat-label-wishlist">Want to Experience</div>
+                                    <div class="stat-sublabel" id="stat-sublabel-wishlist">On your radar</div>
+                                </div>
+                            </div>
+                            <div class="stat-card stat-special">
+                                <div class="stat-icon-large">⭐</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="stat-favorites">0</div>
+                                    <div class="stat-label">Favorites</div>
+                                    <div class="stat-sublabel">5-star rated</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Filters & Views -->
+                        <div class="collection-controls">
+                            <div class="filter-group">
+                                <div class="filter-section">
+                                    <label>Status</label>
+                                    <div class="button-group">
+                                        <button class="filter-btn active" data-filter-type="status" data-filter-value="all">All</button>
+                                        <button class="filter-btn" data-filter-type="status" data-filter-value="completed">Completed</button>
+                                        <button class="filter-btn" data-filter-type="status" data-filter-value="in-progress">In Progress</button>
+                                        <button class="filter-btn" data-filter-type="status" data-filter-value="wishlist">Wishlist</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-section">
+                                    <label>Rating</label>
+                                    <div class="button-group">
+                                        <button class="filter-btn active" data-filter-type="rating" data-filter-value="all">All</button>
+                                        <button class="filter-btn" data-filter-type="rating" data-filter-value="5">⭐⭐⭐⭐⭐</button>
+                                        <button class="filter-btn" data-filter-type="rating" data-filter-value="4">⭐⭐⭐⭐</button>
+                                        <button class="filter-btn" data-filter-type="rating" data-filter-value="3+">⭐⭐⭐+</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-section">
+                                    <label>Sort By</label>
+                                    <select class="sort-select" id="collection-sort">
+                                        <option value="date-desc">Newest First</option>
+                                        <option value="date-asc">Oldest First</option>
+                                        <option value="title-asc">Title (A-Z)</option>
+                                        <option value="title-desc">Title (Z-A)</option>
+                                        <option value="rating-desc">Highest Rated</option>
+                                        <option value="rating-asc">Lowest Rated</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="view-controls">
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="collection-search" placeholder="Search your collection...">
+                                </div>
+                                <div class="view-toggle">
+                                    <button class="view-btn active" data-view="grid" title="Grid View">
+                                        <i class="fas fa-th"></i>
+                                    </button>
+                                    <button class="view-btn" data-view="list" title="List View">
+                                        <i class="fas fa-list"></i>
+                                    </button>
+                                    <button class="view-btn" data-view="timeline" title="Timeline View">
+                                        <i class="fas fa-stream"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Collection Items Display -->
+                        <div class="collection-view-container">
+                            <!-- Grid View (Default) -->
+                            <div id="collection-grid" class="collection-grid active-view">
+                                <!-- Items will be dynamically added here -->
+                            </div>
+
+                            <!-- List View -->
+                            <div id="collection-list" class="collection-list">
+                                <!-- Items will be dynamically added here -->
+                            </div>
+
+                            <!-- Timeline View -->
+                            <div id="collection-timeline" class="collection-timeline">
+                                <!-- Timeline items will be dynamically added here -->
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="empty-state" id="collection-empty">
+                            <div class="empty-icon">📭</div>
+                            <h3>No items yet</h3>
+                            <p>Start building your collection by adding your first item!</p>
+                            <button class="btn-primary" id="add-first-item">
+                                <i class="fas fa-plus"></i> Add Your First Item
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Books Section -->
+                <section id="books-section" class="content-section">
+                    <div class="section-controls">
+                        <div class="filter-controls">
+                            <select id="books-filter">
+                                <option value="all">All Books</option>
+                                <option value="read">Read</option>
+                                <option value="unread">Unread</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="books-list" class="items-list">
+                        <!-- Books will be populated here -->
+                    </div>
+                </section>
+
+                <!-- Shops Section -->
+                <section id="shops-section" class="content-section">
+                    <div class="section-controls">
+                        <div class="filter-controls">
+                            <select id="shops-filter">
+                                <option value="all">All Shops</option>
+                                <option value="favorite">Favorites</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="shops-list" class="items-list">
+                        <!-- Shops will be populated here -->
+                    </div>
+                </section>
+
+                <!-- Magazines Section -->
+                <section id="magazines-section" class="content-section">
+                    <div class="section-controls">
+                        <div class="filter-controls">
+                            <select id="magazines-filter">
+                                <option value="all">All Magazines</option>
+                                <option value="recent">Recent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="magazines-list" class="items-list">
+                        <!-- Magazines will be populated here -->
+                    </div>
+                </section>
+
+                <!-- Professional Dashboard Section -->
+                <section id="professional-dashboard" class="content-section">
+                    <div class="collection-container">
+                        <!-- Header with Breadcrumb -->
+                        <div class="collection-header">
+                            <div class="breadcrumb">
+                                <span class="breadcrumb-item" id="breadcrumb-category">Intellectual</span>
+                                <i class="fas fa-chevron-right"></i>
+                                <span class="breadcrumb-item active" id="breadcrumb-subcategory">Professional</span>
+                            </div>
+                        </div>
+
+                        <!-- Professional Categories Grid -->
+                        <div class="professional-intro">
+                            <h2>💼 Professional Knowledge</h2>
+                            <p>Organize your work-related knowledge, skills, and connections</p>
+                        </div>
+                        
+                        <div class="subcategory-grid">
+                            <!-- Professional subcategories will be dynamically added here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Preferences Section -->
+                <section id="preferences-section" class="content-section">
+                    <div class="preferences-grid">
+                        <div class="preference-category">
+                            <h3>Food & Dining</h3>
+                            <div id="food-preferences" class="preference-list">
+                                <!-- Food preferences will be populated here -->
+                            </div>
+                        </div>
+                        <div class="preference-category">
+                            <h3>Entertainment</h3>
+                            <div id="entertainment-preferences" class="preference-list">
+                                <!-- Entertainment preferences will be populated here -->
+                            </div>
+                        </div>
+                        <div class="preference-category">
+                            <h3>Lifestyle</h3>
+                            <div id="lifestyle-preferences" class="preference-list">
+                                <!-- Lifestyle preferences will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for adding/editing items -->
+    <div id="item-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Item</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="item-form">
+                    <!-- Form fields will be dynamically generated based on the section -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="modal-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="apiService.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
