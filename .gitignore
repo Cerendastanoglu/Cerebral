@@ -2,35 +2,46 @@
 node_modules/
 package-lock.json
 
-# Database
+# Database - User's personal data (NEVER commit!)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
 src/data/*.db
-src/data/*.db-journal
+src/data/*.db-*
 
 # Build outputs
 dist/
 build/
 out/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Environment variables
+.env
+.env.local
+.env.*.local
 
-# IDE files
+# Editor directories and files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.DS_Store
 
 # Logs
 logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Environment variables
-.env
-.env.local
+# OS
+Thumbs.db
 
-# Electron specific
-*.cache
+# User preferences and cache
+.cache/
+tmp/
+temp/
 
+# Electron
+.electron/

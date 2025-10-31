@@ -66,33 +66,30 @@ class CerebralApp {
 
     init() {
         this.setupEventListeners();
+        this.loadQuickStatsPreferences();
         this.showSection('dashboard');
+    }
+    
+    loadQuickStatsPreferences() {
+        // Load saved preferences or set defaults
+        const saved = localStorage.getItem('quickStatsPreferences');
+        if (saved) {
+            this.quickStatsPreferences = JSON.parse(saved);
+        } else {
+            // Default preferences
+            this.quickStatsPreferences = ['books', 'movies', 'music', 'restaurants'];
+        }
+    }
+    
+    saveQuickStatsPreferences(preferences) {
+        this.quickStatsPreferences = preferences;
+        localStorage.setItem('quickStatsPreferences', JSON.stringify(preferences));
     }
 
     setupEventListeners() {
-        // Sidebar toggle
-        document.getElementById('toggle-sidebar').addEventListener('click', () => {
-            this.toggleSidebar();
-        });
-
-        // Sidebar close
-        document.getElementById('close-sidebar').addEventListener('click', () => {
-            this.closeSidebar();
-        });
-
-        // Open sidebar
-        document.getElementById('open-sidebar').addEventListener('click', () => {
-            this.openSidebar();
-        });
-
-        // Overlay click to close sidebar
-        document.getElementById('sidebar-overlay').addEventListener('click', () => {
-            this.closeSidebar();
-        });
-
-        // Navigation buttons
-        const navBtns = document.querySelectorAll('.nav-btn');
-        navBtns.forEach((btn) => {
+        // Header Navigation buttons
+        const headerNavBtns = document.querySelectorAll('.header-nav-btn');
+        headerNavBtns.forEach((btn) => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -276,11 +273,80 @@ class CerebralApp {
         document.getElementById('modal-save').addEventListener('click', () => {
             this.saveItem();
         });
+        
+        // Quick Stats Management
+        const manageQuickStatsBtn = document.getElementById('manage-quick-stats');
+        if (manageQuickStatsBtn) {
+            manageQuickStatsBtn.addEventListener('click', () => {
+                this.openQuickStatsModal();
+            });
+        }
+        
+        const closeQuickStatsModal = document.getElementById('close-quick-stats-modal');
+        if (closeQuickStatsModal) {
+            closeQuickStatsModal.addEventListener('click', () => {
+                this.closeQuickStatsModal();
+            });
+        }
+        
+        const cancelQuickStats = document.getElementById('cancel-quick-stats');
+        if (cancelQuickStats) {
+            cancelQuickStats.addEventListener('click', () => {
+                this.closeQuickStatsModal();
+            });
+        }
+        
+        const saveQuickStats = document.getElementById('save-quick-stats');
+        if (saveQuickStats) {
+            saveQuickStats.addEventListener('click', () => {
+                this.saveQuickStatsSelection();
+            });
+        }
+        
+        // Help button
+        const helpBtn = document.getElementById('help-btn');
+        if (helpBtn) {
+            helpBtn.addEventListener('click', () => {
+                this.openHelpModal();
+            });
+        }
+        
+        const closeHelpModal = document.getElementById('close-help-modal');
+        if (closeHelpModal) {
+            closeHelpModal.addEventListener('click', () => {
+                this.closeHelpModal();
+            });
+        }
+        
+        const closeHelpOk = document.getElementById('close-help-ok');
+        if (closeHelpOk) {
+            closeHelpOk.addEventListener('click', () => {
+                this.closeHelpModal();
+            });
+        }
+        
+        // Privacy button
+        const privacyBtn = document.getElementById('privacy-btn');
+        if (privacyBtn) {
+            privacyBtn.addEventListener('click', () => {
+                this.openPrivacyModal();
+            });
+        }
+        
+        const closePrivacyModal = document.getElementById('close-privacy-modal');
+        if (closePrivacyModal) {
+            closePrivacyModal.addEventListener('click', () => {
+                this.closePrivacyModal();
+            });
+        }
+        
+        const closePrivacyOk = document.getElementById('close-privacy-ok');
+        if (closePrivacyOk) {
+            closePrivacyOk.addEventListener('click', () => {
+                this.closePrivacyModal();
+            });
+        }
 
-        // Global search
-        document.getElementById('global-search').addEventListener('input', (e) => {
-            this.performGlobalSearch(e.target.value);
-        });
     }
 
     initCanvas() {
@@ -2347,15 +2413,15 @@ class CerebralApp {
         `;
     }
     
-    showSection(section) {
+    async showSection(section) {
         this.currentSection = section;
         this.currentCategory = section === 'dashboard' ? null : section;
         
         // Update active nav button
-        document.querySelectorAll('.nav-btn').forEach(btn => {
+        document.querySelectorAll('.header-nav-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        const activeBtn = document.querySelector(`[data-section="${section}"]`);
+        const activeBtn = document.querySelector(`.header-nav-btn[data-section="${section}"]`);
         if (activeBtn) activeBtn.classList.add('active');
         
         // Hide all sections
@@ -2366,7 +2432,7 @@ class CerebralApp {
         // Show selected section
         if (section === 'dashboard') {
             document.getElementById('dashboard-section').classList.add('active');
-            this.loadEnhancedDashboard();
+            await this.loadEnhancedDashboard();
         } else if (section === 'collection-dashboard') {
             const collectionSection = document.getElementById('collection-dashboard');
             if (collectionSection) collectionSection.classList.add('active');
@@ -2384,6 +2450,8 @@ class CerebralApp {
     
     async loadEnhancedDashboard() {
         try {
+            console.log('Loading enhanced dashboard...');
+            
             // Load stats for each category
             const categories = ['intellectual', 'emotional', 'physical', 'beyond'];
             
@@ -2391,15 +2459,20 @@ class CerebralApp {
                 const count = await this.getCategoryCount(category);
                 const weekCount = await this.getWeekCount(category);
                 
-                document.getElementById(`stat-${category}`).textContent = count;
-                document.getElementById(`stat-${category}-detail`).textContent = `${weekCount} this week`;
+                const statElement = document.getElementById(`stat-${category}`);
+                const statDetailElement = document.getElementById(`stat-${category}-detail`);
+                
+                if (statElement) statElement.textContent = count;
+                if (statDetailElement) statDetailElement.textContent = `${weekCount} this week`;
             }
             
             // Load recent activity
             await this.loadRecentActivity();
             
-            // Load quick stats
+            // Load quick stats - ALWAYS load to ensure UI is populated
             await this.loadQuickStats();
+            
+            console.log('Enhanced dashboard loaded successfully');
         } catch (error) {
             console.error('Error loading dashboard:', error);
         }
@@ -2407,9 +2480,32 @@ class CerebralApp {
     
     async getCategoryCount(category) {
         try {
-            const result = await ipcRenderer.invoke('db-query', 'SELECT COUNT(*) as count FROM books', []);
-            return result[0]?.count || 0;
+            // Map categories to their relevant tables
+            const categoryTables = {
+                'intellectual': ['books', 'podcasts', 'courses', 'documentaries', 'ideas'],
+                'emotional': ['movies', 'shows', 'music', 'art', 'games', 'journal'],
+                'physical': ['restaurants', 'recipes', 'places', 'activities', 'shopping', 'fitness'],
+                'beyond': ['meditation', 'philosophy', 'spirituality', 'dreams', 'gratitude', 'wisdom']
+            };
+            
+            const tables = categoryTables[category] || [];
+            let totalCount = 0;
+            
+            // Query each table and sum the counts
+            for (const table of tables) {
+                try {
+                    const result = await ipcRenderer.invoke('db-query', 
+                        `SELECT COUNT(*) as count FROM ${table}`, []);
+                    totalCount += result[0]?.count || 0;
+                } catch (err) {
+                    // Table might not exist yet, continue
+                    console.log(`Table ${table} might not exist yet`);
+                }
+            }
+            
+            return totalCount;
         } catch (error) {
+            console.error('Error getting category count:', error);
             return 0;
         }
     }
@@ -2418,12 +2514,35 @@ class CerebralApp {
         try {
             const weekAgo = new Date();
             weekAgo.setDate(weekAgo.getDate() - 7);
-            const result = await ipcRenderer.invoke('db-query',
-                'SELECT COUNT(*) as count FROM books WHERE created_at >= ?',
-                [weekAgo.toISOString()]
-            );
-            return result[0]?.count || 0;
+            
+            // Map categories to their relevant tables
+            const categoryTables = {
+                'intellectual': ['books', 'podcasts', 'courses', 'documentaries', 'ideas'],
+                'emotional': ['movies', 'shows', 'music', 'art', 'games', 'journal'],
+                'physical': ['restaurants', 'recipes', 'places', 'activities', 'shopping', 'fitness'],
+                'beyond': ['meditation', 'philosophy', 'spirituality', 'dreams', 'gratitude', 'wisdom']
+            };
+            
+            const tables = categoryTables[category] || [];
+            let totalCount = 0;
+            
+            // Query each table and sum the counts for this week
+            for (const table of tables) {
+                try {
+                    const result = await ipcRenderer.invoke('db-query',
+                        `SELECT COUNT(*) as count FROM ${table} WHERE created_at >= ?`,
+                        [weekAgo.toISOString()]
+                    );
+                    totalCount += result[0]?.count || 0;
+                } catch (err) {
+                    // Table might not exist yet, continue
+                    console.log(`Table ${table} might not exist yet`);
+                }
+            }
+            
+            return totalCount;
         } catch (error) {
+            console.error('Error getting week count:', error);
             return 0;
         }
     }
@@ -2433,45 +2552,265 @@ class CerebralApp {
         if (!container) return;
         
         try {
-            const items = await ipcRenderer.invoke('db-query',
-                'SELECT * FROM books ORDER BY created_at DESC LIMIT 5',
-                []
-            );
+            // Query all items from all tables and combine them
+            const allItems = [];
             
-            if (items.length === 0) {
+            // Helper function to get icon and background for each type
+            const getIconInfo = (type) => {
+                const iconMap = {
+                    'books': { icon: 'fa-book', bg: '#eff6ff', color: '#3b82f6' },
+                    'movies': { icon: 'fa-film', bg: '#fef3c7', color: '#f59e0b' },
+                    'podcasts': { icon: 'fa-podcast', bg: '#e0e7ff', color: '#6366f1' },
+                    'courses': { icon: 'fa-graduation-cap', bg: '#dbeafe', color: '#3b82f6' },
+                    'music': { icon: 'fa-music', bg: '#fce7f3', color: '#ec4899' },
+                    'shows': { icon: 'fa-tv', bg: '#fce7f3', color: '#ec4899' },
+                    'restaurants': { icon: 'fa-utensils', bg: '#dcfce7', color: '#10b981' },
+                    'recipes': { icon: 'fa-utensils', bg: '#dcfce7', color: '#10b981' },
+                    'places': { icon: 'fa-map-marker-alt', bg: '#dcfce7', color: '#10b981' },
+                    'meditation': { icon: 'fa-om', bg: '#fef3c7', color: '#f59e0b' },
+                    'default': { icon: 'fa-star', bg: '#f3f4f6', color: '#6b7280' }
+                };
+                return iconMap[type] || iconMap['default'];
+            };
+            
+            // Try to fetch from common tables
+            const tables = ['books', 'movies', 'podcasts', 'courses', 'music', 'shows', 'restaurants', 'recipes', 'places', 'meditation'];
+            
+            for (const table of tables) {
+                try {
+                    const items = await ipcRenderer.invoke('db-query',
+                        `SELECT *, '${table}' as type FROM ${table} ORDER BY created_at DESC LIMIT 10`,
+                        []
+                    );
+                    allItems.push(...items);
+                } catch (err) {
+                    // Table might not exist, continue
+                    console.log(`Table ${table} might not exist yet`);
+                }
+            }
+            
+            // Sort all items by created_at and take the 5 most recent
+            allItems.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const recentItems = allItems.slice(0, 5);
+            
+            if (recentItems.length === 0) {
                 container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 2rem;">No recent activity</div>';
                 return;
             }
             
-            container.innerHTML = items.map(item => `
-                <div class="activity-item">
-                    <div class="activity-icon" style="background: #eff6ff; color: #3b82f6;">
-                        <i class="fas fa-book"></i>
+            container.innerHTML = recentItems.map(item => {
+                const iconInfo = getIconInfo(item.type);
+                const title = item.title || item.name || 'Untitled';
+                const subtitle = item.author || item.creator || item.director || 'Added';
+                
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: ${iconInfo.bg}; color: ${iconInfo.color};">
+                            <i class="fas ${iconInfo.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${title}</div>
+                            <div class="activity-meta">${subtitle} • Added ${this.formatDate(item.created_at)}</div>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <div class="activity-title">${item.title}</div>
-                        <div class="activity-meta">${item.author || 'Unknown'} • Added ${this.formatDate(item.created_at)}</div>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         } catch (error) {
             console.error('Error loading recent activity:', error);
+            container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 2rem;">Error loading recent activity</div>';
         }
     }
     
+    getAllAvailableSubcategories() {
+        // Dynamically extract all subcategories from the app's subcategories structure
+        const allSubcats = {};
+        
+        for (const category in this.subcategories) {
+            for (const key in this.subcategories[category]) {
+                const subcat = this.subcategories[category][key];
+                // Skip professional subcategory as it has nested subcategories
+                if (subcat.subcategories) continue;
+                
+                // Map icon to FontAwesome icon class
+                const iconMap = {
+                    '📚': 'fa-book',
+                    '🎙️': 'fa-podcast',
+                    '🎓': 'fa-graduation-cap',
+                    '🎞️': 'fa-film',
+                    '💡': 'fa-lightbulb',
+                    '🎬': 'fa-film',
+                    '📺': 'fa-tv',
+                    '🎵': 'fa-music',
+                    '🎨': 'fa-palette',
+                    '🎮': 'fa-gamepad',
+                    '📔': 'fa-book',
+                    '🍽️': 'fa-utensils',
+                    '🍳': 'fa-utensils',
+                    '🗺️': 'fa-map-marker-alt',
+                    '⚡': 'fa-bolt',
+                    '🛍️': 'fa-shopping-bag',
+                    '💪': 'fa-dumbbell',
+                    '🧘': 'fa-om',
+                    '🤔': 'fa-brain',
+                    '🌟': 'fa-star',
+                    '💭': 'fa-cloud',
+                    '🙏': 'fa-hands',
+                    '✨': 'fa-sparkles'
+                };
+                
+                allSubcats[key] = {
+                    name: subcat.name,
+                    icon: iconMap[subcat.icon] || 'fa-star',
+                    emojiIcon: subcat.icon,
+                    table: key,
+                    description: subcat.description
+                };
+            }
+        }
+        
+        return allSubcats;
+    }
+    
     async loadQuickStats() {
+        const container = document.getElementById('quick-stats-container');
+        if (!container) return;
+        
         try {
-            const booksCount = await ipcRenderer.invoke('db-query', 'SELECT COUNT(*) as count FROM books', []);
-            document.getElementById('books-count').textContent = booksCount[0]?.count || 0;
+            // Get all available subcategories dynamically
+            const availableStats = this.getAllAvailableSubcategories();
             
-            const moviesCount = await ipcRenderer.invoke('db-query', 'SELECT COUNT(*) as count FROM movies', []);
-            document.getElementById('movies-count').textContent = moviesCount[0]?.count || 0;
+            // Get user preferences (or use defaults)
+            const selectedStats = this.quickStatsPreferences || ['books', 'movies', 'music', 'restaurants'];
             
-            // Set placeholders for music and workouts
-            document.getElementById('music-count').textContent = '0';
-            document.getElementById('workouts-count').textContent = '0';
+            // Generate HTML for selected stats
+            const statsHTML = await Promise.all(
+                selectedStats.map(async (key) => {
+                    const stat = availableStats[key];
+                    if (!stat) return '';
+                    
+                    let count = 0;
+                    try {
+                        const result = await ipcRenderer.invoke('db-query', 
+                            `SELECT COUNT(*) as count FROM ${stat.table}`, []);
+                        count = result[0]?.count || 0;
+                    } catch (err) {
+                        // Table might not exist yet
+                        console.log(`Table ${stat.table} might not exist yet`);
+                    }
+                    
+                    return `
+                        <div class="quick-stat">
+                            <i class="fas ${stat.icon}"></i>
+                            <span class="quick-stat-number">${count}</span>
+                            <span class="quick-stat-label">${stat.name}</span>
+                        </div>
+                    `;
+                })
+            );
+            
+            container.innerHTML = statsHTML.filter(html => html !== '').join('');
         } catch (error) {
             console.error('Error loading quick stats:', error);
+        }
+    }
+    
+    openQuickStatsModal() {
+        const modal = document.getElementById('quick-stats-modal');
+        const optionsContainer = document.getElementById('quick-stats-options');
+        
+        if (!modal || !optionsContainer) return;
+        
+        // Get all available categories dynamically from app structure
+        const availableStats = this.getAllAvailableSubcategories();
+        
+        // Get current preferences
+        const selected = this.quickStatsPreferences || ['books', 'movies', 'music', 'restaurants'];
+        
+        // Generate options HTML
+        const optionsHTML = Object.entries(availableStats).map(([key, stat]) => {
+            const isSelected = selected.includes(key);
+            return `
+                <div class="quick-stat-option ${isSelected ? 'selected' : ''}" data-stat="${key}">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} id="stat-${key}">
+                    <span class="quick-stat-option-icon">${stat.emojiIcon}</span>
+                    <div class="quick-stat-option-info">
+                        <div class="quick-stat-option-name">${stat.name}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        optionsContainer.innerHTML = optionsHTML;
+        
+        // Add click handlers
+        optionsContainer.querySelectorAll('.quick-stat-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const checkbox = option.querySelector('input[type="checkbox"]');
+                if (e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                }
+                option.classList.toggle('selected', checkbox.checked);
+            });
+        });
+        
+        modal.classList.add('active');
+    }
+    
+    closeQuickStatsModal() {
+        const modal = document.getElementById('quick-stats-modal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    }
+    
+    async saveQuickStatsSelection() {
+        const optionsContainer = document.getElementById('quick-stats-options');
+        if (!optionsContainer) return;
+        
+        // Get selected stats
+        const selected = [];
+        optionsContainer.querySelectorAll('.quick-stat-option input[type="checkbox"]:checked').forEach(checkbox => {
+            const option = checkbox.closest('.quick-stat-option');
+            if (option) {
+                selected.push(option.dataset.stat);
+            }
+        });
+        
+        // Save preferences
+        this.saveQuickStatsPreferences(selected);
+        
+        // Reload quick stats
+        await this.loadQuickStats();
+        
+        // Close modal
+        this.closeQuickStatsModal();
+    }
+    
+    openHelpModal() {
+        const modal = document.getElementById('help-modal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+    }
+    
+    closeHelpModal() {
+        const modal = document.getElementById('help-modal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    }
+    
+    openPrivacyModal() {
+        const modal = document.getElementById('privacy-modal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+    }
+    
+    closePrivacyModal() {
+        const modal = document.getElementById('privacy-modal');
+        if (modal) {
+            modal.classList.remove('active');
         }
     }
     

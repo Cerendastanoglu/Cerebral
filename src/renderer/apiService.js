@@ -1,26 +1,50 @@
 /**
  * API Service for fetching data from external sources
- * Supports: Google Books API, The Movie Database (TMDB), Spotify API, etc.
+ * Supports: Google Books, iTunes (Podcasts/Music), TMDB, RAWG, TheMealDB, etc.
  */
 
 class APIService {
     constructor() {
-        // API Keys (in production, these should be stored securely)
+        // API Endpoints (Free, No Keys Required)
         this.googleBooksAPI = 'https://www.googleapis.com/books/v1/volumes';
+        this.itunesSearchAPI = 'https://itunes.apple.com/search';
+        this.mealDBAPI = 'https://www.themealdb.com/api/json/v1/1';
+        
+        // APIs requiring keys (optional - stored in localStorage)
         this.omdbAPI = 'https://www.omdbapi.com/';
-        this.omdbKey = 't='; // Users will need to get their own key from http://www.omdbapi.com/apikey.aspx
+        this.tmdbAPI = 'https://api.themoviedb.org/3';
+        this.rawgAPI = 'https://api.rawg.io/api';
+        this.yelpAPI = 'https://api.yelp.com/v3';
         
         // Rate limiting
-        this.lastRequestTime = 0;
-        this.minRequestInterval = 500; // ms between requests
+        this.lastRequestTime = {};
+        this.minRequestInterval = 500; // ms between requests per API
+        
+        // Load API keys from localStorage
+        this.loadAPIKeys();
+    }
+    
+    loadAPIKeys() {
+        this.apiKeys = {
+            omdb: localStorage.getItem('apiKey_omdb') || '',
+            tmdb: localStorage.getItem('apiKey_tmdb') || '',
+            rawg: localStorage.getItem('apiKey_rawg') || '',
+            yelp: localStorage.getItem('apiKey_yelp') || ''
+        };
+    }
+    
+    saveAPIKey(service, key) {
+        localStorage.setItem(`apiKey_${service}`, key);
+        this.apiKeys[service] = key;
     }
 
     /**
      * Rate limiter to prevent API abuse
      */
-    async rateLimit() {
+    async rateLimit(apiName = 'default') {
         const now = Date.now();
-        const timeSinceLastRequest = now - this.lastRequestTime;
+        const lastRequest = this.lastRequestTime[apiName] || 0;
+        const timeSinceLastRequest = now - lastRequest;
         
         if (timeSinceLastRequest < this.minRequestInterval) {
             await new Promise(resolve => 
@@ -28,7 +52,7 @@ class APIService {
             );
         }
         
-        this.lastRequestTime = Date.now();
+        this.lastRequestTime[apiName] = Date.now();
     }
 
     /**
@@ -139,6 +163,166 @@ class APIService {
     }
 
     /**
+     * Search for podcasts using iTunes Search API (FREE)
+     * @param {string} query - Search query
+     * @returns {Promise<Array>} Array of podcast results
+     */
+    async searchPodcasts(query) {
+        if (!query || query.trim().length < 2) return [];
+        
+        await this.rateLimit('itunes');
+        
+        try {
+            const url = `${this.itunesSearchAPI}?term=${encodeURIComponent(query)}&media=podcast&limit=20`;
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (!data.results || data.results.length === 0) return [];
+            
+            return data.results.map(item => ({
+                id: item.collectionId,
+                title: item.collectionName || item.trackName,
+                creator: item.artistName || 'Unknown',
+                description: item.description || '',
+                thumbnail: item.artworkUrl600 || item.artworkUrl100 || '',
+                genre: item.primaryGenreName || '',
+                episodeCount: item.trackCount || 0,
+                feedUrl: item.feedUrl || '',
+                releaseDate: item.releaseDate || '',
+                type: 'podcast'
+            }));
+        } catch (error) {
+            console.error('Error fetching podcasts:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Search for music using iTunes Search API (FREE)
+     * @param {string} query - Search query
+     * @returns {Promise<Array>} Array of music results
+     */
+    async searchMusic(query) {
+        if (!query || query.trim().length < 2) return [];
+        
+        await this.rateLimit('itunes');
+        
+        try {
+            const url = `${this.itunesSearchAPI}?term=${encodeURIComponent(query)}&media=music&entity=album&limit=20`;
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (!data.results || data.results.length === 0) return [];
+            
+            return data.results.map(item => ({
+                id: item.collectionId,
+                title: item.collectionName,
+                artist: item.artistName,
+                year: item.releaseDate ? item.releaseDate.split('-')[0] : '',
+                thumbnail: item.artworkUrl100 || '',
+                genre: item.primaryGenreName || '',
+                trackCount: item.trackCount || 0,
+                type: 'music'
+            }));
+        } catch (error) {
+            console.error('Error fetching music:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Search for TV shows using iTunes Search API (FREE)
+     * @param {string} query - Search query
+     * @returns {Promise<Array>} Array of TV show results
+     */
+    async searchTVShows(query) {
+        if (!query || query.trim().length < 2) return [];
+        
+        await this.rateLimit('itunes');
+        
+        try {
+            const url = `${this.itunesSearchAPI}?term=${encodeURIComponent(query)}&media=tvShow&entity=tvSeason&limit=20`;
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (!data.results || data.results.length === 0) return [];
+            
+            return data.results.map(item => ({
+                id: item.collectionId,
+                title: item.collectionName,
+                creator: item.artistName,
+                year: item.releaseDate ? item.releaseDate.split('-')[0] : '',
+                thumbnail: item.artworkUrl600 || item.artworkUrl100 || '',
+                genre: item.primaryGenreName || '',
+                description: item.longDescription || item.shortDescription || '',
+                type: 'show'
+            }));
+        } catch (error) {
+            console.error('Error fetching TV shows:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Search for recipes using TheMealDB (FREE, No Key Required)
+     * @param {string} query - Search query
+     * @returns {Promise<Array>} Array of recipe results
+     */
+    async searchRecipes(query) {
+        if (!query || query.trim().length < 2) return [];
+        
+        await this.rateLimit('mealdb');
+        
+        try {
+            const url = `${this.mealDBAPI}/search.php?s=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (!data.meals) return [];
+            
+            return data.meals.map(item => ({
+                id: item.idMeal,
+                title: item.strMeal,
+                category: item.strCategory,
+                cuisine: item.strArea,
+                thumbnail: item.strMealThumb,
+                instructions: item.strInstructions,
+                ingredients: this.extractIngredients(item),
+                youtubeUrl: item.strYoutube || '',
+                sourceUrl: item.strSource || '',
+                type: 'recipe'
+            }));
+        } catch (error) {
+            console.error('Error fetching recipes:', error);
+            return [];
+        }
+    }
+
+    extractIngredients(meal) {
+        const ingredients = [];
+        for (let i = 1; i <= 20; i++) {
+            const ingredient = meal[`strIngredient${i}`];
+            const measure = meal[`strMeasure${i}`];
+            if (ingredient && ingredient.trim()) {
+                ingredients.push(`${measure} ${ingredient}`.trim());
+            }
+        }
+        return ingredients;
+    }
+
+    /**
      * Search across multiple sources based on category
      * @param {string} query - Search query
      * @param {string} category - Category type (books, movies, music, etc.)
@@ -147,15 +331,25 @@ class APIService {
     async search(query, category) {
         switch (category) {
             case 'books':
-            case 'academic':
                 return await this.searchBooks(query);
             
             case 'movies':
-            case 'films':
+            case 'documentaries':
                 return await this.searchMovies(query);
             
+            case 'podcasts':
+                return await this.searchPodcasts(query);
+            
+            case 'music':
+                return await this.searchMusic(query);
+            
+            case 'shows':
+                return await this.searchTVShows(query);
+            
+            case 'recipes':
+                return await this.searchRecipes(query);
+            
             default:
-                // For other categories, search books by default
                 return await this.searchBooks(query);
         }
     }
@@ -175,4 +369,5 @@ class APIService {
 
 // Export as singleton
 window.apiService = new APIService();
+
 

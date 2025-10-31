@@ -1,80 +1,104 @@
-# Cerebral - Personal Data Manager
+# Cerebral - Your Personal Knowledge Map 🧠
 
-A beautiful, cross-platform desktop application for storing and managing all your personal preferences, from movies and books to shops and lifestyle choices.
+A beautiful, privacy-focused desktop application for organizing your intellectual, emotional, physical, and spiritual knowledge.
 
-## Features
+## 🌟 Features
 
-- **Movies**: Track your movie collection with ratings, genres, directors, and watch dates
-- **Books**: Manage your reading list with author information, ratings, and reading progress
-- **Shops**: Keep a record of your favorite stores, restaurants, and businesses
-- **Magazines**: Track magazine subscriptions and issues
-- **Preferences**: Store personal preferences across different categories
-- **Search**: Global search across all your data
-- **Modern UI**: Clean, intuitive interface with dark sidebar and light content area
+- **Four Knowledge Dimensions**: Intellectual, Emotional, Physical, and Beyond
+- **Rich Categories**: Track books, movies, podcasts, restaurants, fitness, meditation, and more
+- **Customizable Dashboard**: Choose which stats to display on your dashboard
+- **Recent Activity**: See your latest additions across all categories
+- **Privacy First**: All data stored locally on your device
 
-## Installation
+## 🔒 Privacy & Data Storage
 
-1. Clone or download this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+**Your data never leaves your device.**
 
-## Running the App
+- ✅ 100% local storage using SQLite
+- ✅ No cloud syncing
+- ✅ No data transmission to servers
+- ✅ No analytics or tracking
+- ✅ No account required
 
-### Development Mode
+See [DATA_PRIVACY.md](DATA_PRIVACY.md) for complete details.
+
+## 📦 Installation
+
 ```bash
-npm run dev
-```
+# Install dependencies
+npm install
 
-### Production Mode
-```bash
+# Run the app
 npm start
 ```
 
-## Building for Distribution
+## 🎨 Customization
 
-### Build for Current Platform
-```bash
-npm run build
+### Quick Stats
+Click the "Manage" button in the Quick Stats section to customize which categories appear on your dashboard.
+
+### Data Backup
+Your data is stored in: `src/data/cerebral.db`
+
+To backup:
+1. Copy the `cerebral.db` file to a safe location
+2. Restore by replacing the file in the same location
+
+## 🛠️ Technology Stack
+
+- **Electron**: Cross-platform desktop application
+- **SQLite**: Local database storage
+- **Vanilla JavaScript**: No heavy frameworks
+- **CSS3**: Modern, responsive design
+- **Font Awesome**: Beautiful icons
+
+## 📁 Project Structure
+
+```
+cerebral/
+├── src/
+│   ├── main/           # Electron main process
+│   ├── renderer/       # UI and app logic
+│   │   ├── index.html  # Main HTML
+│   │   ├── app.js      # Application logic
+│   │   └── apiService.js
+│   ├── styles/         # CSS files
+│   └── data/           # Local SQLite database (gitignored)
+├── node_modules/       # Dependencies
+└── package.json        # Project configuration
 ```
 
-### Build for Mac
-```bash
-npm run build:mac
-```
+## 🎯 Categories Available
 
-### Build for Windows
-```bash
-npm run build:win
-```
+### Intellectual 🧠
+- Books, Podcasts, Courses, Documentaries, Ideas
 
-## Usage
+### Emotional ❤️
+- Movies, TV Shows, Music, Art, Games, Journal
 
-1. **Dashboard**: View overview statistics and recent items
-2. **Add Items**: Click the "Add Item" button to add new entries
-3. **Edit Items**: Click the "Edit" button on any item card
-4. **Search**: Use the global search bar to find items across all categories
-5. **Filter**: Use the filter dropdowns in each section to narrow down results
+### Physical 💪
+- Restaurants, Recipes, Places, Activities, Shopping, Fitness
 
-## Data Storage
+### Beyond ✨
+- Meditation, Philosophy, Spirituality, Dreams, Gratitude, Wisdom
 
-All data is stored locally in a SQLite database (`src/data/cerebral.db`). Your data stays private and secure on your device.
+## 🔐 Security Notes
 
-## Technology Stack
+- Database file is gitignored by default
+- No external API calls for data storage
+- All preferences stored in browser localStorage (local only)
+- Safe to use offline
 
-- **Electron**: Cross-platform desktop app framework
-- **SQLite3**: Local database storage
-- **HTML/CSS/JavaScript**: Frontend interface
-- **Node.js**: Backend runtime
+## 🤝 Contributing
 
-## Customization
+This is a personal knowledge management tool. Feel free to fork and customize for your own use!
 
-You can easily extend the app by:
-- Adding new categories in the database schema
-- Creating new form fields in the `getFormFields()` method
-- Adding new sections to the navigation
+## 📝 License
 
-## License
+MIT License - See LICENSE file for details
 
-ISC License - feel free to modify and distribute as needed.
+---
+
+**Built with ❤️ for personal knowledge management**
+
+*Your mind is your greatest asset. Keep it organized.*

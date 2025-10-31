@@ -15,68 +15,60 @@
         <main class="main-content">
             <!-- Header -->
             <header class="content-header">
-                <div class="header-content">
-                    <button class="open-sidebar-btn" id="open-sidebar">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="app-title">
-                        <i class="fas fa-brain"></i>
-                        Cerebral
-                    </h1>
-                    <p class="app-subtitle">Your Personal Knowledge Map</p>
+                <div class="header-top-row">
+                    <!-- Logo and Title (Left) -->
+                    <div class="header-brand">
+                        <i class="fas fa-brain brand-icon"></i>
+                        <div class="brand-text">
+                            <h1 class="app-title">Cerebral</h1>
+                            <p class="app-subtitle">Your Personal Knowledge Map</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Window Controls (Right) -->
+                    <div class="header-actions">
+                        <button class="header-action-btn" id="help-btn" title="Help & Documentation">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="header-action-btn" id="privacy-btn" title="Privacy Policy">
+                            <i class="fas fa-shield-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="header-bottom-row">
+                    <!-- Navigation Menu (Centered) -->
+                    <nav class="header-nav">
+                        <button class="header-nav-btn active" data-section="dashboard">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Dashboard</span>
+                        </button>
+                        <button class="header-nav-btn" data-section="intellectual">
+                            <i class="fas fa-brain"></i>
+                            <span>Intellectual</span>
+                        </button>
+                        <button class="header-nav-btn" data-section="emotional">
+                            <i class="fas fa-heart"></i>
+                            <span>Emotional</span>
+                        </button>
+                        <button class="header-nav-btn" data-section="physical">
+                            <i class="fas fa-fire"></i>
+                            <span>Physical</span>
+                        </button>
+                        <button class="header-nav-btn" data-section="beyond">
+                            <i class="fas fa-star"></i>
+                            <span>Beyond</span>
+                        </button>
+                    </nav>
                 </div>
             </header>
 
             <!-- Content Area -->
             <div class="content-area">
-                <!-- Sidebar Overlay -->
-                <div class="sidebar-overlay" id="sidebar-overlay"></div>
-                
-                <!-- Collapsible Left Sidebar -->
-                <aside class="sidebar" id="sidebar">
-                    <div class="sidebar-header">
-                        <button class="close-btn" id="close-sidebar">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <button class="toggle-btn" id="toggle-sidebar">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="sidebar-content">
-                        <nav class="sidebar-nav">
-                            <button class="nav-btn active" data-section="dashboard">
-                                <i class="fas fa-chart-pie"></i>
-                                <span>Dashboard</span>
-                            </button>
-                            <button class="nav-btn" data-section="intellectual">
-                                <i class="fas fa-brain"></i>
-                                <span>Intellectual</span>
-                            </button>
-                            <button class="nav-btn" data-section="emotional">
-                                <i class="fas fa-heart"></i>
-                                <span>Emotional</span>
-                            </button>
-                            <button class="nav-btn" data-section="physical">
-                                <i class="fas fa-fire"></i>
-                                <span>Physical</span>
-                            </button>
-                            <button class="nav-btn" data-section="beyond">
-                                <i class="fas fa-star"></i>
-                                <span>Beyond</span>
-                            </button>
-                        </nav>
-                        
-                        <div class="search-section">
-                            <input type="text" id="global-search" placeholder="Search..." class="search-input">
-                        </div>
-                    </div>
-                </aside>
-
                 <!-- Main Content -->
                 <main class="main-content-area" id="main-content">
-                    <!-- Dashboard Section -->
-                    <section id="dashboard-section" class="content-section active">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="content-section active">
                         <div class="dashboard-content">
                             <div class="dashboard-header">
                                 <h2>Your Personal Knowledge Map</h2>
@@ -124,33 +116,19 @@
                                 <h3>Recent Activity</h3>
                                 <div id="recent-activity" class="activity-list">
                                     <!-- Recent items will be populated here -->
-                                </div>
+                        </div>
                             </div>
                             
                             <!-- Quick Stats -->
                             <div class="dashboard-section">
-                                <h3>Quick Stats</h3>
-                                <div class="quick-stats-grid">
-                                    <div class="quick-stat">
-                                        <i class="fas fa-book"></i>
-                                        <span class="quick-stat-number" id="books-count">0</span>
-                                        <span class="quick-stat-label">Books</span>
-                                    </div>
-                                    <div class="quick-stat">
-                                        <i class="fas fa-film"></i>
-                                        <span class="quick-stat-number" id="movies-count">0</span>
-                                        <span class="quick-stat-label">Movies</span>
-                                    </div>
-                                    <div class="quick-stat">
-                                        <i class="fas fa-music"></i>
-                                        <span class="quick-stat-number" id="music-count">0</span>
-                                        <span class="quick-stat-label">Music</span>
-                                    </div>
-                                    <div class="quick-stat">
-                                        <i class="fas fa-dumbbell"></i>
-                                        <span class="quick-stat-number" id="workouts-count">0</span>
-                                        <span class="quick-stat-label">Workouts</span>
-                                    </div>
+                                <div class="section-header-with-action">
+                                    <h3>Quick Stats</h3>
+                                    <button class="btn-secondary btn-small" id="manage-quick-stats">
+                                        <i class="fas fa-cog"></i> Manage
+                                    </button>
+                                </div>
+                                <div class="quick-stats-grid" id="quick-stats-container">
+                                    <!-- Stats will be dynamically added here -->
                                 </div>
                             </div>
                         </div>
@@ -401,8 +379,8 @@
                                         </div>
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
-                                </div>
-                                
+                    </div>
+                    
                                 <!-- Recent Items Preview -->
                                 <div class="panel-section">
                                     <h4 class="panel-section-title">Recent Items</h4>
@@ -487,7 +465,7 @@
                                     <option value="title-asc">A-Z</option>
                                     <option value="title-desc">Z-A</option>
                                     <option value="rating-desc">Top Rated</option>
-                                </select>
+                            </select>
                             </div>
                         </div>
 
@@ -633,6 +611,129 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="modal-cancel">Cancel</button>
                 <button type="submit" class="btn btn-primary" id="modal-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for managing quick stats -->
+    <div id="quick-stats-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Manage Quick Stats</h3>
+                <button class="modal-close" id="close-quick-stats-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #64748b; margin-bottom: 1rem;">Select the categories you want to display in Quick Stats:</p>
+                <div id="quick-stats-options" class="quick-stats-options">
+                    <!-- Options will be dynamically added here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel-quick-stats">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-quick-stats">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Help/Documentation -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> Help & Documentation</h3>
+                <button class="modal-close" id="close-help-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h4>🧠 About Cerebral</h4>
+                    <p>Cerebral is your personal knowledge management system designed to organize your intellectual, emotional, physical, and spiritual experiences.</p>
+                    
+                    <h4>📁 Categories</h4>
+                    <ul class="help-list">
+                        <li><strong>Intellectual 🧠</strong> - Books, Podcasts, Courses, Documentaries, Ideas</li>
+                        <li><strong>Emotional ❤️</strong> - Movies, TV Shows, Music, Art, Games, Journal</li>
+                        <li><strong>Physical 💪</strong> - Restaurants, Recipes, Places, Activities, Shopping, Fitness</li>
+                        <li><strong>Beyond ✨</strong> - Meditation, Philosophy, Spirituality, Dreams, Gratitude, Wisdom</li>
+                    </ul>
+                    
+                    <h4>🎯 Quick Start</h4>
+                    <ol class="help-list">
+                        <li>Navigate using the menu buttons in the header</li>
+                        <li>Click on any category to explore subcategories</li>
+                        <li>Click on a subcategory to add items</li>
+                        <li>Customize your dashboard Quick Stats using the "Manage" button</li>
+                    </ol>
+                    
+                    <h4>💾 Your Data</h4>
+                    <p><strong>100% Local Storage</strong> - All your data is stored locally on your device at:</p>
+                    <code>src/data/cerebral.db</code>
+                    <p style="margin-top: 0.5rem;">To backup your data, simply copy this file to a safe location.</p>
+                    
+                    <h4>🔒 Privacy</h4>
+                    <p>Your data never leaves your device. No cloud syncing, no tracking, no external servers. Click the privacy shield button for full details.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="close-help-ok">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Privacy Policy -->
+    <div id="privacy-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3><i class="fas fa-shield-alt"></i> Privacy & Data Storage</h3>
+                <button class="modal-close" id="close-privacy-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-content">
+                    <h4>🔒 Local-Only Data Storage</h4>
+                    <p>Cerebral stores <strong>ALL data locally</strong> on your device. We are committed to protecting your privacy.</p>
+                    
+                    <h4>✅ What We DO:</h4>
+                    <ul class="help-list">
+                        <li>Store all your data in a local SQLite database</li>
+                        <li>Keep all files on your device only</li>
+                        <li>Never upload or sync data to any cloud service</li>
+                        <li>Never transmit your data over the internet</li>
+                        <li>Never collect analytics or telemetry</li>
+                        <li>All data stays on YOUR computer</li>
+                    </ul>
+                    
+                    <h4>❌ What We DON'T DO:</h4>
+                    <ul class="help-list">
+                        <li>No cloud storage</li>
+                        <li>No data transmission to external servers</li>
+                        <li>No tracking or analytics</li>
+                        <li>No third-party data sharing</li>
+                        <li>No automatic backups to cloud services</li>
+                        <li>No account creation or authentication required</li>
+                    </ul>
+                    
+                    <h4>📍 Where Your Data Lives:</h4>
+                    <p>Your data is stored in:</p>
+                    <ul class="help-list">
+                        <li><strong>Database:</strong> <code>src/data/cerebral.db</code></li>
+                        <li><strong>Preferences:</strong> Browser's localStorage (also local)</li>
+                    </ul>
+                    
+                    <h4>💾 Manual Backup (Recommended):</h4>
+                    <ol class="help-list">
+                        <li>Locate: <code>src/data/cerebral.db</code></li>
+                        <li>Copy this file to your preferred backup location</li>
+                        <li>Your preferences are stored in browser localStorage</li>
+                    </ol>
+                    
+                    <h4>🔐 Security:</h4>
+                    <ul class="help-list">
+                        <li>Data never leaves your device</li>
+                        <li>No network communication for data storage</li>
+                        <li>Your knowledge is yours alone</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="close-privacy-ok">I Understand</button>
             </div>
         </div>
     </div>
